@@ -4,33 +4,35 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 from pathlib import Path
+import string
 
-def getDataset(dSet):
-    for tensor in dSet:
-        return tensor[0]
+#get data line by line
+path = Path(__file__).parent  / 'test data'  / 'europarl-v7-EN.txt'
 
-#create dataset from text files
-path = Path(__file__).parent / 'test data'
-dataset = keras.preprocessing.text_dataset_from_directory(path)
+f = open(path, encoding="utf8")
 
-#create text vectorizer to create mapping between datasets
-text_vectorizer = layers.experimental.preprocessing.TextVectorization(output_mode ="int")
+input_sentances = []
+output_sentances = []
 
-print(dataset)
-
-initalDataSet = getDataset(dataset)
-print(initalDataSet)
-#adapt the vectorizer and appliy it to the data to create mapping from en to fr
-text_vectorizer.adapt(initalDataSet)
-
-dataset= dataset.map(
-    lambda x, y: (text_vectorizer(x), y)
-)
-#get mapped data set
-mappedDataSet = getDataset(dataset)
-print(mappedDataSet)
+input_words = set()
+output_words = set()
 
 
+for line in f.readlines():
+    #convert to lower case, strip punctuation, remove newlines and add to sentance array
+    line = line.lower().translate(str.maketrans('', '', string.punctuation)).replace("\n", "")
+    input_sentances.append(line)
+    print(line)
+    #add to unique words found
+    words = line.split(" ")
+    for word in words:
+        #print(word)
+        if word not in input_words:
+            input_words.add(word)
+
+print(sorted(list(input_words)))
+
+    
 
 
 """
