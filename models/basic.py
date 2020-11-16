@@ -29,18 +29,23 @@ def pre_process_data(path, is_output):
     return unique_sentances, sorted(list(unique_words)), len(unique_words), max([len(txt.split(' ')) for txt in unique_sentances])
 #english dataset
 path = Path(__file__).parent  / 'test data'  / 'europarl-v7-EN.txt'
-input_sentances, input_words, num_input_tokens, max_input_length = pre_process_data(path, False)
+input_sentances, input_words, num_encoder_tokens, max_input_length = pre_process_data(path, False)
+
 #print(input_words)
 #print(num_input_tokens)
 print(max_input_length)
 
 #french dataset
 path = Path(__file__).parent  / 'test data'  / 'europarl-v7-FR.txt'
-output_sentances, output_words, num_output_tokens, max_output_length = pre_process_data(path, True)
+output_sentances, output_words, num_decoder_tokens, max_output_length = pre_process_data(path, True)
+
 #print(output_words)
 #print(max_output_length)
-print(max_output_length)
+#print(max_output_length)
 
+#word dictionaries
+input_word_index = dict([(word, i) for i, word in enumerate(input_words)])
+output_word_index = dict([word , i] for i,word in enumerate(output_words))
     
 
 
