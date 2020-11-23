@@ -9,7 +9,7 @@ def pre_process_data(path, is_output):
         line = line.lower().translate(str.maketrans('', '', string.punctuation)).replace("\n", "")
         if(is_output):
             #add start and end tokens to translations
-            line = "[[" + line + "]]"
+            line = "[[ " + line + " ]]"
         unique_sentances.append(line)
         print(line)
         #add to unique words found
