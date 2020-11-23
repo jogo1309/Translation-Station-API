@@ -11,7 +11,7 @@ def pre_process_data(path, is_output):
             #add start and end tokens to translations
             line = "[[ " + line + " ]]"
         unique_sentances.append(line)
-        print(line)
+        #print(line)
         #add to unique words found
         words = line.split(" ")
         for word in words:
