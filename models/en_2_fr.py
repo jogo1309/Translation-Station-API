@@ -15,7 +15,7 @@ encoder_input_vector, decoder_input_vector, decoder_output_vector, num_encoder_t
 
 #print(encoder_input_vector[1,12])
 
-batch_size = 64
+batch_size = 2
 epochs = 1
 latent_dim = 256
 
@@ -59,8 +59,8 @@ decoder_outputs = decoder_dense(decoder_outputs)
 model = keras.Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.summary()
 
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['acc'])
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=[keras.metrics.CategoricalAccuracy()])
 print(num_encoder_tokens)
 print("fitting model:")
-model.fit([encoder_input_vector, decoder_input_vector], decoder_output_vector, batch_size=64, epochs=100, validation_split=0.2)
+model.fit([encoder_input_vector, decoder_input_vector], decoder_output_vector, batch_size=2, epochs=100, validation_split=0.2)
 
