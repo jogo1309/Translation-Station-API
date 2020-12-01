@@ -17,12 +17,39 @@ def data_formatting(input_file_path, outpur_file_path):
     #print(max_output_length)
     #print(max_output_length)
 
-    #word dictionaries
-    input_word_index = dict([(word, i) for i, word in enumerate(input_words)])
-    output_word_index = dict([(word , i) for i,word in enumerate(output_words)])
+    #word dictionaries start at index 1 as 0 is the blank number
+    input_word_index = dict([(word, i+1) for i, word in enumerate(input_words)])
+    output_word_index = dict([(word , i+1) for i,word in enumerate(output_words)])
+    #print(output_word_index)
+   
+
+    #make vectors 2 dims 1: amount of sentancrs 2: max length of sentance
+    #map each sentance to it's integer equivilent
+
+    #empty vectors of correct length
+    encoder_input_vectors = np.zeros((len(input_sentances), max_input_length), dtype='float32')
+    decoder_input_vectors = np.zeros((len(output_sentances), max_output_length), dtype='float32')
+    decoder_output_vectors = np.zeros((len(output_sentances), max_output_length), dtype='float32')
+
+    #create word - index sequence
+
+    for i, (input_sentances, output_sentances) in enumerate(zip(input_sentances, output_sentances)):
+
+        for j, word in enumerate(input_sentances.split()):
+            #set word j in sentance i to the index in the dictionary
+            encoder_input_vectors[i, j] = input_word_index[word]
+
+        for j, word in enumerate(output_sentances.split()):
+            decoder_input_vectors[i, j] = output_word_index[word]
+
+            if(j > 0):
+                decoder_output_vectors[i, j-1] = output_word_index[word]
+    
+    print(decoder_output_vectors)
 
     #one hot encoding array's
     #each array has 3 dimentions 1: amount of sentances, 2: max length of a sentance, 3: amount of unique words in the dataset
+    """
 
     #empty vectors of correct length
     encoder_input_vectors = np.zeros((len(input_sentances), max_input_length, num_encoder_tokens), dtype='float32')
@@ -47,6 +74,7 @@ def data_formatting(input_file_path, outpur_file_path):
                 #decoder_output should not include the start [[ token and be one timestep ahead
              
                 decoder_output_vectors[i, j, output_word_index[word]] = 1
+    """
 
     return encoder_input_vectors, decoder_input_vectors, decoder_output_vectors, num_encoder_tokens, num_decoder_tokens
 

@@ -19,4 +19,4 @@ def pre_process_data(path, is_output):
             if word not in unique_words:
                 unique_words.add(word)
     
-    return unique_sentances, sorted(list(unique_words)), len(unique_words), max([len(txt.split(' ')) for txt in unique_sentances])
+    return unique_sentances, sorted(list(unique_words)), len(unique_words)+1, max([len(txt.split(' ')) for txt in unique_sentances])
