@@ -16,8 +16,8 @@ encoder_input_vector, decoder_input_vector, decoder_output_vector, num_encoder_t
 
 #print(encoder_input_vector[1,12])
 
-batch_size = 2
-epochs = 10
+batch_size = 32
+epochs = 50
 latent_dim = 256
 
 
@@ -60,7 +60,7 @@ model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy', metri
 #model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=[keras.metrics.CategoricalAccuracy()])
 print(num_encoder_tokens)
 print("fitting model:")
-model.fit([encoder_input_vector, decoder_input_vector], decoder_output_vector, batch_size=2, epochs=50, validation_split=0.2)
+model.fit([encoder_input_vector, decoder_input_vector], decoder_output_vector, batch_size=batch_size, epochs=epochs, validation_split=0.2)
 
 model.save("en2fr")
 
