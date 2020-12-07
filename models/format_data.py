@@ -45,7 +45,7 @@ def data_formatting(input_file_path, outpur_file_path):
             if(j > 0):
                 decoder_output_vectors[i, j-1] = output_word_index[word]
     
-    print(decoder_output_vectors)
+    #print(decoder_output_vectors)
 
     #one hot encoding array's
     #each array has 3 dimentions 1: amount of sentances, 2: max length of a sentance, 3: amount of unique words in the dataset
@@ -76,5 +76,5 @@ def data_formatting(input_file_path, outpur_file_path):
                 decoder_output_vectors[i, j, output_word_index[word]] = 1
     """
 
-    return encoder_input_vectors, decoder_input_vectors, decoder_output_vectors, num_encoder_tokens, num_decoder_tokens
+    return encoder_input_vectors, decoder_input_vectors, decoder_output_vectors, num_encoder_tokens, num_decoder_tokens, input_word_index, output_word_index
 
