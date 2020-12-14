@@ -76,5 +76,5 @@ def data_formatting(input_file_path, outpur_file_path):
                 decoder_output_vectors[i, j, output_word_index[word]] = 1
     """
 
-    return encoder_input_vectors, decoder_input_vectors, decoder_output_vectors, num_encoder_tokens, num_decoder_tokens, input_word_index, output_word_index
+    return encoder_input_vectors, decoder_input_vectors, decoder_output_vectors, num_encoder_tokens, num_decoder_tokens, input_word_index, output_word_index, max_input_length
 
