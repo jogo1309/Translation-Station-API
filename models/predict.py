@@ -7,7 +7,7 @@ def predict(input_word_index, output_word_index, max_length, sentance):
 
     #inference - used to predict sentances
     #used to encode the sentance to be predicted
-    model_fr = keras.models.load_model("en2fr")
+    model_fr = keras.models.load_model("en2fr_10000")
     #print(model_fr.input)
 
     encoder_inputs = model_fr.input[0]
