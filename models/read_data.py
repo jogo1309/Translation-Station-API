@@ -7,7 +7,8 @@ def pre_process_data(path, is_output):
     f = open(path, encoding="utf8")
     for line in f.readlines():
         #convert to lower case, strip punctuation, remove newlines and add to sentance array
-        line = line.lower().translate(str.maketrans('', '', string.punctuation)).replace("\n", "").replace(u'\xa0', u' ').strip()
+        cus_punctuation = string.punctuation.replace("'", "")
+        line = line.lower().translate(str.maketrans('', '', cus_punctuation)).replace("\n", "").replace(u'\xa0', u' ').strip()
         if(is_output):
             #add start and end tokens to translations
             line = "[[ " + line + " ]]"
