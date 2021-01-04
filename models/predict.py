@@ -7,38 +7,81 @@ def predict(input_word_index, output_word_index, max_length, sentance):
 
     #inference - used to predict sentances
     #used to encode the sentance to be predicted
-    model_fr = keras.models.load_model("en2fr_10000")
+    model_fr = keras.models.load_model("en2fr_bidi")
     #print(model_fr.input)
 
     encoder_inputs = model_fr.input[0]
-    encoder_outputs, encoder_state_h, encoder_state_c = model_fr.layers[4].output
+    ###LSTM###
+    #encoder_outputs, encoder_state_h, encoder_state_c = model_fr.layers[4].output
+    #encoder_states = [encoder_state_h, encoder_state_c]
+    ###BIDIRECTIONAL###
+    encoder_outputs, encoder_f_h, encoder_f_c, encoder_b_h, encoder_b_c = model_fr.layers[3].output
+    encoder_state_h = keras.layers.Concatenate()([encoder_f_h, encoder_b_h])
+    encoder_state_c = keras.layers.Concatenate()([encoder_f_c, encoder_b_c])
     encoder_states = [encoder_state_h, encoder_state_c]
+    ###GRU###
     #encoder_outputs, encoder_state_h = model_fr.layers[4].output
     #encoder_states = [encoder_state_h]
+
+
     encoder_model = keras.Model(encoder_inputs, encoder_states)
 
     #decoder setup
-    decoder_state_h = keras.Input(shape=(latent_dim,), name="stateh")
-    decoder_state_c = keras.Input(shape=(latent_dim,), name="statec")
+
+    ###LSTM###
+    #decoder_state_h = keras.Input(shape=(latent_dim,), name="stateh")
+    #decoder_state_c = keras.Input(shape=(latent_dim,), name="statec")
+    #decoder_state = [decoder_state_h, decoder_state_c]
+
+    #embeddings of decoder seq
+    #decoder_inputs = model_fr.input[1]
+    #decoder_embed = model_fr.layers[3]
+    #inf_decoder_embed = decoder_embed(decoder_inputs)
+
+    #to predict set the first states to the states from the previous word7
+    #decoder_lstm = model_fr.layers[5]
+    #inf_decoder_outputs , inf_state_h, inf_state_c = decoder_lstm(inf_decoder_embed, initial_state=decoder_state)
+    #inf_decoder_states = [inf_state_h, inf_state_c]
+    
+
+    #pass output through dense layer
+    #decoder_dense = model_fr.layers[6]
+    #inf_decoder_outputs = decoder_dense(inf_decoder_outputs)
+
+    ###BIDIRECTIONAL###
+    decoder_state_h = keras.Input(shape=(latent_dim*2,), name="stateh")
+    decoder_state_c = keras.Input(shape=(latent_dim*2,), name="statec")
     decoder_state = [decoder_state_h, decoder_state_c]
-    #decoder_state = [decoder_state_h]
 
     #embeddings of decoder seq
     decoder_inputs = model_fr.input[1]
-    decoder_embed = model_fr.layers[3]
+    decoder_embed = model_fr.layers[4]
     inf_decoder_embed = decoder_embed(decoder_inputs)
 
     #to predict set the first states to the states from the previous word7
-    decoder_lstm = model_fr.layers[5]
+    decoder_lstm = model_fr.layers[7]
     inf_decoder_outputs , inf_state_h, inf_state_c = decoder_lstm(inf_decoder_embed, initial_state=decoder_state)
     inf_decoder_states = [inf_state_h, inf_state_c]
+    
+
+    #pass output through dense layer
+    decoder_dense = model_fr.layers[8]
+    inf_decoder_outputs = decoder_dense(inf_decoder_outputs)
+
+    ###GRU###
+    #decoder_state_h = keras.Input(shape=(latent_dim,), name="stateh")
+    #decoder_state = [decoder_state_h]
+
+    #decoder_inputs = model_fr.input[1]
+    #decoder_embed = model_fr.layers[3]
+    #inf_decoder_embed = decoder_embed(decoder_inputs)
+
     #decoder_gru = model_fr.layers[5]
     #inf_decoder_outputs , inf_state_h = decoder_gru(inf_decoder_embed, initial_state=decoder_state)
     #inf_decoder_states = [inf_state_h]
 
-    #pass output through dense layer
-    decoder_dense = model_fr.layers[6]
-    inf_decoder_outputs = decoder_dense(inf_decoder_outputs)
+    #decoder_dense = model_fr.layers[6]
+    #inf_decoder_outputs = decoder_dense(inf_decoder_outputs)
 
     #decoder_model
     inf_decoder_model = keras.Model([decoder_inputs] + decoder_state, [inf_decoder_outputs] + inf_decoder_states)
@@ -57,7 +100,9 @@ def predict(input_word_index, output_word_index, max_length, sentance):
         output_sentance = ''
 
         while not should_stop:
+            ###LSTM###
             output_tokens, h, c = inf_decoder_model.predict([frn_sentance] + encoded_state)
+            ###GRU###
             #output_tokens, h = inf_decoder_model.predict([frn_sentance] + [encoded_state])
             found_word_index = np.argmax(output_tokens[0, -1, :])
             found_word = list(output_word_index.keys())[list(output_word_index.values()).index(found_word_index)]
@@ -71,7 +116,9 @@ def predict(input_word_index, output_word_index, max_length, sentance):
             frn_sentance = np.zeros((1,1))
             frn_sentance[0,0] = found_word_index
 
+            ###LSTM###
             encoded_state = [h, c]
+            ###GRU###
             #encoded_state = [h]
         return output_sentance.replace(']','')
     #test prediction
