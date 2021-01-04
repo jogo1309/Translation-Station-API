@@ -26,19 +26,40 @@ def run_model():
     #set up encoder
     encoder_inputs = keras.Input(shape=(None,))
     encoder_embed =  layers.Embedding(num_encoder_tokens, latent_dim, mask_zero=True)(encoder_inputs)
-    encoder_lstm = layers.LSTM(latent_dim, return_state=True)
-    encoder_outputs, state_h, state_c = encoder_lstm(encoder_embed)
+    
+    ####LSTM###
+    #encoder_lstm = layers.LSTM(latent_dim, return_state=True)
+    # encoder_outputs, state_h, state_c = encoder_lstm(encoder_embed)
+    #encoder_states = [state_h, state_c]
+    
+    ###Birdirectional####
+    encoder_lstm = layers.Bidirectional(layers.LSTM(latent_dim, return_state=True))
+    encoder_outputs, f_state_h, f_state_c, b_state_h, b_state_c = encoder_lstm(encoder_embed)
+    state_h = keras.layers.Concatenate()([f_state_h, b_state_h])
+    state_c = keras.layers.Concatenate()([f_state_c, b_state_c])
     encoder_states = [state_h, state_c]
-   # encoder_gru = layers.GRU(latent_dim, return_state=True)
+
+    ####GRU####
+    #encoder_gru = layers.GRU(latent_dim, return_state=True)
     #encoder_outputs, state_h = encoder_gru(encoder_embed)
+    
 
     #set up decoder
     decoder_inputs = keras.Input(shape=(None,))
     decoder_embed = layers.Embedding(num_decoder_tokens, latent_dim, mask_zero=True)(decoder_inputs)
-    decoder_lstm = layers.LSTM(latent_dim, return_sequences=True, return_state=True)
+
+    ####LSTM####
+    #decoder_lstm = layers.LSTM(latent_dim, return_sequences=True, return_state=True)
+    #decoder_outputs, _, _  = decoder_lstm(decoder_embed, initial_state=encoder_states)
+    
+    ####Bidirectional####
+    decoder_lstm = layers.LSTM(latent_dim*2, return_sequences=True, return_state=True)
     decoder_outputs, _, _  = decoder_lstm(decoder_embed, initial_state=encoder_states)
+
+    ####GRU####
     #decoder_gru = layers.GRU(latent_dim, return_sequences=True, return_state=True)
     #decoder_outputs, _ = decoder_gru(decoder_embed, initial_state=state_h)
+
     decoder_dense = layers.Dense(num_decoder_tokens, activation='softmax')
     decoder_outputs= decoder_dense(decoder_outputs)
 
