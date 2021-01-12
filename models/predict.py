@@ -3,7 +3,7 @@ import numpy as np
 
 def load_LSTM(latent_dim):
     #load saved LSTM model
-    model_fr = keras.models.load_model("en2fr_10000")
+    model_fr = keras.models.load_model("en2fr_LSTM")
 
     #create encoder model
     encoder_inputs = model_fr.input[0]
