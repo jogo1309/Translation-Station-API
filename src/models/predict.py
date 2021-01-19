@@ -1,5 +1,7 @@
+from src.errors.APIerror import APIError
 from tensorflow import keras
 import numpy as np
+import traceback
 
 def load_LSTM(latent_dim):
     #load saved LSTM model
@@ -110,68 +112,87 @@ def load_GRU(latent_dim):
 
 
 def predict(model_type, input_word_index, output_word_index, max_length, sentance):
-    latent_dim = 256
+    try:
+        latent_dim = 256
 
-    #inference - used to predict sentances
-  
-    #get models so sentance can be encoded and decoded during prediction
-    encoder_model = None
-    inf_decoder_model = None
-    if(model_type == "LSTM"):
-        encoder_model, inf_decoder_model = load_LSTM(latent_dim)
-    elif(model_type == "BiDi"):
-        encoder_model, inf_decoder_model = load_BiDi(latent_dim)
-    elif(model_type == "GRU"):
-        encoder_model, inf_decoder_model = load_GRU(latent_dim)
-    else:
-        print("Error: Unkown model specified")
+        #inference - used to predict sentances
+    
+        #get models so sentance can be encoded and decoded during prediction
+        encoder_model = None
+        inf_decoder_model = None
+        if(model_type == "LSTM"):
+            encoder_model, inf_decoder_model = load_LSTM(latent_dim)
+        elif(model_type == "BiDi"):
+            encoder_model, inf_decoder_model = load_BiDi(latent_dim)
+        elif(model_type == "GRU"):
+            encoder_model, inf_decoder_model = load_GRU(latent_dim)
+        else:
+            print("Error: Unkown model specified")
 
-    #inference function
-    def predict_sentance(eng_sentance):
-        #encode input
-        encoded_state = encoder_model.predict(eng_sentance)
+        #inference function
+        def predict_sentance(eng_sentance):
+            #encode input
+            encoded_state = encoder_model.predict(eng_sentance)
 
-        #generate empty french sentance
-        frn_sentance = np.zeros((1,1))
-        #set first word to start character [[
-        frn_sentance[0,0] = output_word_index["[["]
-
-        should_stop=False
-        output_sentance = ''
-
-        while not should_stop:
-            if(model_type != "GRU"):
-                output_tokens, h, c = inf_decoder_model.predict([frn_sentance] + encoded_state)
-            else:
-                output_tokens, h = inf_decoder_model.predict([frn_sentance] + [encoded_state])
-
-            found_word_index = np.argmax(output_tokens[0, -1, :])
-            found_word = list(output_word_index.keys())[list(output_word_index.values()).index(found_word_index)]
-            output_sentance += ' ' + found_word
-
-            #exit condition
-            if(found_word == ']]' or len(output_sentance) > 100):
-                should_stop = True
-            
-            #update frn sentace to new state
+            #generate empty french sentance
             frn_sentance = np.zeros((1,1))
-            frn_sentance[0,0] = found_word_index
+            #set first word to start character [[
+            frn_sentance[0,0] = output_word_index["[["]
 
-            if(model_type != "GRU"):
-                encoded_state = [h, c]
-            else:
-                encoded_state = [h]
+            should_stop=False
+            output_sentance = ''
+
+            while not should_stop:
+                if(model_type != "GRU"):
+                    output_tokens, h, c = inf_decoder_model.predict([frn_sentance] + encoded_state)
+                else:
+                    output_tokens, h = inf_decoder_model.predict([frn_sentance] + [encoded_state])
+
+                found_word_index = np.argmax(output_tokens[0, -1, :])
+                found_word = list(output_word_index.keys())[list(output_word_index.values()).index(found_word_index)]
+                output_sentance += ' ' + found_word
+
+                #exit condition
+                if(found_word == ']]' or len(output_sentance) > 100):
+                    should_stop = True
                 
-        return output_sentance.replace(']','')
+                #update frn sentace to new state
+                frn_sentance = np.zeros((1,1))
+                frn_sentance[0,0] = found_word_index
 
-    #test prediction
-    if(encoder_model != None):
-        print(max_length)
-        eng_vector = np.zeros((1, max_length))
-        print(input_word_index)
-        for j, word in enumerate(sentance.split()):
-            eng_vector[0, j] = input_word_index[word]
-        print(eng_vector)
-        decoded_sentance = predict_sentance(eng_vector)
-        print("english sentance: ", sentance )
-        print("french sentace: " , decoded_sentance)
+                if(model_type != "GRU"):
+                    encoded_state = [h, c]
+                else:
+                    encoded_state = [h]
+                    
+            return output_sentance.replace(']','')
+
+        #test prediction
+        if(encoder_model != None):
+            #print(max_length)
+            eng_vector = np.zeros((1, max_length))
+            #print(input_word_index)
+            try:
+                for j, word in enumerate(sentance.split()):
+                    eng_vector[0, j] = input_word_index[word]
+            except Exception as e:
+                raise APIError("KeyError: " + str(e) + " is not a known word", 400)
+
+            #print(eng_vector)
+            decoded_sentance = predict_sentance(eng_vector)
+            print("english sentance: ", sentance )
+            print("french sentace: " , decoded_sentance)
+            return decoded_sentance
+    except Exception as e:
+        message = ""
+        status_code = 500
+
+        if(hasattr(e, 'message')):
+            message = e.message
+        else:
+            message = str(e)
+        
+        if(hasattr(e, 'status_code')):
+            status_code = e.status_code
+        
+        raise APIError(message, status_code)
