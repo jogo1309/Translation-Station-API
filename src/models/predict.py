@@ -1,7 +1,9 @@
 from src.errors.APIerror import APIError
 from tensorflow import keras
 import numpy as np
-import traceback
+import logging
+
+logger = logging.getLogger()
 
 def load_LSTM(latent_dim):
     #load saved LSTM model
@@ -186,7 +188,7 @@ def predict(model_type, input_word_index, output_word_index, max_length, sentanc
     except Exception as e:
         message = ""
         status_code = 500
-
+        logger.exception("A Prediction Error Occured")
         if(hasattr(e, 'message')):
             message = e.message
         else:
