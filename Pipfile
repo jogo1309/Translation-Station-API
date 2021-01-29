@@ -10,6 +10,7 @@ numpy = "*"
 keras = "*"
 tensorflow-cpu = "*"
 flask = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.7"
