@@ -5,9 +5,13 @@ import logging
 
 logger = logging.getLogger()
 
+lstm_model = keras.models.load_model("en2fr_LSTM")
+bidi_model = keras.models.load_model("en2fr_bidi")
+gru_model = keras.models.load_model("en2fr_GRU")
+
 def load_LSTM(latent_dim):
     #load saved LSTM model
-    model_fr = keras.models.load_model("en2fr_LSTM")
+    model_fr = lstm_model
 
     #create encoder model
     encoder_inputs = model_fr.input[0]
@@ -44,7 +48,7 @@ def load_LSTM(latent_dim):
 
 def load_BiDi(latent_dim):
     #load bidirectional model
-    model_fr = keras.models.load_model("en2fr_bidi")
+    model_fr = bidi_model
 
     #encoder model
     encoder_inputs = model_fr.input[0]
@@ -82,7 +86,7 @@ def load_BiDi(latent_dim):
 
 def load_GRU(latent_dim):
     #load GRU model
-    model_fr = keras.models.load_model("en2fr_GRU")
+    model_fr = gru_model
 
     #encoder model
     encoder_inputs = model_fr.input[0]

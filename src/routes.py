@@ -1,3 +1,4 @@
+import string
 from src.errors.APIerror import APIError
 from .main import app
 
@@ -11,9 +12,13 @@ from pathlib import Path
 MODEL_TYPES = ["BiDi", "LSTM", "GRU"]
 
 @app.route('/translate/<model_id>/<sentance>')
-def test(model_id, sentance):
+def doPrediction(model_id, sentance):
+    cus_punctuation = string.punctuation.replace("'", "")
+    sentance = sentance.lower().translate(str.maketrans('', '', cus_punctuation)).replace("\n", "").replace(u'\xa0', u' ').strip()
+
     if(not model_id in MODEL_TYPES):
         raise APIError("Error: invalid model specified", 400)
+    
     prediction = predict.predict(model_id, model.input_word_index, model.output_word_index, model.max_input_length, sentance)
     return {
         "eng": sentance,
